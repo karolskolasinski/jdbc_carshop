@@ -4,20 +4,14 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static carshop.CarQueries.*;
 
 public class CarDAO {
-    /*Metody:
-        - szukanie rekordów po nazwisku właściciela
-        - szukanie po marce/modelu
-    */
-
     private MysqlConnection mysqlConnection;
 
-    public CarDAO() throws SQLException, IOException {
-        mysqlConnection = new MysqlConnection();
+    public CarDAO(MysqlConnection mysqlConnection) throws SQLException, IOException {
+        this.mysqlConnection = new MysqlConnection();
         createTableIfNotExist();
     }
 
@@ -100,31 +94,31 @@ public class CarDAO {
         return car;
     }
 
-    public Optional<Car> getByRegistrationNumber(String searchedRegistrationNumber) throws SQLException {
+    public List<Car> getByRegistrationNumber(String searchedRegistrationNumber) throws SQLException {
         return getCar(searchedRegistrationNumber, SELECT_BY_REGISTRATION_NUMBER_QUERY);
     }
 
-    public Optional<Car> getByOwnerName(String searchedOwnerName) throws SQLException {
+    public List<Car> getByOwnerName(String searchedOwnerName) throws SQLException {
         return getCar(searchedOwnerName, SELECT_BY_OWNER_NAME_QUERY);
     }
 
-    public Optional<Car> getByBrandAndModel(String searchedBrandAndModel) throws SQLException {
+    public List<Car> getByBrandAndModel(String searchedBrandAndModel) throws SQLException {
         return getCar(searchedBrandAndModel, SELECT_BY_CAR_BRAND_AND_MODEL_QUERY);
     }
 
-    private Optional<Car> getCar(String searchedName, String toSearch) throws SQLException {
-        Car car;
+    private List<Car> getCar(String searchedName, String toSearch) throws SQLException {
+        List<Car> carList = new ArrayList<>();
         try (Connection connection = mysqlConnection.getConnection()) {
             try (PreparedStatement statement = connection.prepareStatement(toSearch)) {
                 statement.setString(1, "%" + searchedName + "%");
                 ResultSet resultSet = statement.executeQuery();
                 if (resultSet.next()) {
-                    car = loadCarFromResultSet(resultSet);
-                    return Optional.of(car);
+                    Car car = loadCarFromResultSet(resultSet);
+                    carList.add(car);
                 }
             }
         }
-        return Optional.empty();
+        return carList;
     }
 
 

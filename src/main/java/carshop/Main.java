@@ -9,8 +9,12 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         String command;
         CarDAO carDAO;
+        CarRepairOrderDAO carRepairOrderDAO;
+
         try {
-            carDAO = new CarDAO();
+            MysqlConnection mysqlConnection = new MysqlConnection();
+            carDAO = new CarDAO(mysqlConnection);
+            carRepairOrderDAO = new CarRepairOrderDAO(mysqlConnection);
         } catch (SQLException e) {
             System.err.println("Car dao cannot be created. Mysql error");
             System.err.println("Error: " + e.getMessage());
@@ -22,10 +26,13 @@ public class Main {
             return;
         }
 
+
         do {
             System.out.println("co chcesz zrobić? \n" +
                     "dodać samochód (d) :: listuj (l) :: usuń po id (uid) :: usuń po nr rejestracyjnym (urej) :: " +
-                    "wypisz po rejestracji (lrej) :: wypisz po nazwisku właściwciela (lname) :: listuj po marce (lmarka) :: quit (q)");
+                    "wypisz po rejestracji (lrej) :: wypisz po nazwisku właściwciela (lname) :: listuj po marce (lmarka) :: " +
+                    "dodaj naprawę (nap) :: listuj wszystkie zlecenia samochodu po id (lnap)" +
+                    "quit (q)");
             command = scanner.nextLine();
             try {
                 switch (command) {
@@ -76,9 +83,18 @@ public class Main {
                         System.out.println(carDAO.getByOwnerName(searchedName));
                         break;
                     case "lmarka":
-                        System.out.println("podaj numer rejestracyjny do wypisania");
-                        String searchedNumber = scanner.nextLine();
-                        System.out.println(carDAO.getByRegistrationNumber(searchedNumber));
+                        System.out.println("podaj markę i model do wypisania");
+                        String searchedBrandAndModel = scanner.nextLine();
+                        System.out.println(carDAO.getByBrandAndModel(searchedBrandAndModel));
+                        break;
+                    case "nap":
+                        System.out.println("podaj treść naprawy");
+                        String orderText = scanner.nextLine();
+                        System.out.println("podaj id samochodu");
+                        Long idCar = Long.valueOf(scanner.nextLine());
+                        carRepairOrderDAO.insertCarRepairOrder(orderText, idCar);
+                    case "lnap":
+
                         break;
                     case "q":
                         break;
